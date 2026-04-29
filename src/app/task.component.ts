@@ -1,6 +1,4 @@
 import {
-  EventEmitter,
-  signal,
   input,
   output,
   ChangeDetectionStrategy,
@@ -9,11 +7,8 @@ import {
 import {
   MatCard,
   MatCardContent,
-  MatCardHeader,
-  MatCardTitle,
 } from '@angular/material/card';
 import { Task, TaskWithSubtasks } from './services/task.service';
-import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -25,10 +20,7 @@ import { MatDividerModule } from '@angular/material/divider';
   standalone: true,
   imports: [
     MatCard,
-    MatCardHeader,
-    MatCardTitle,
     MatCardContent,
-    MatCheckbox,
     MatButtonToggleModule,
     MatIconModule,
     MatButtonModule,
@@ -54,10 +46,11 @@ export class TaskComponent {
 
   onCheckedChangeMainTask(task?: TaskWithSubtasks) {
     if (task) {
+      const newState = !task.maintask.completed;
       task.subtasks.forEach((subtask: Task) => {
-        subtask.completed = !task.maintask.completed;
+        subtask.completed = newState;
       });
-      task.maintask.completed = !task.maintask.completed;
+      task.maintask.completed = newState;
       this.onTasksCompletedToggle.emit([task.maintask, ...task.subtasks]);
     }
   }

@@ -1,18 +1,16 @@
 import {
-  EventEmitter,
   input,
   output,
   ChangeDetectionStrategy,
   Component,
 } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
-import { MatCheckbox } from '@angular/material/checkbox';
-import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-checkboximage',
   standalone: true,
-  imports: [MatCheckbox, MatIconModule, MatCardModule],
+  imports: [MatButtonModule, MatCardModule],
   templateUrl: './checkboximage.component.html',
   styleUrl: './checkboximage.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,12 +21,12 @@ export class CheckboximageComponent {
   onCheckedChanged = output<boolean>();
 
   onClick() {
-    this.onCheckedChanged.emit(!this.checked);
+    this.onCheckedChanged.emit(!this.checked());
   }
 
   async getFile() {
     const fetchImage = await fetch(this.src());
     const blob = await fetchImage.blob();
-    return new File([blob], 'dot.png', blob);
+    return new File([blob], 'dot.png', { type: blob.type });
   }
 }

@@ -7,7 +7,7 @@
   # Use https://search.nixos.org/packages to find packages
   packages = [
     pkgs.terraform
-    pkgs.nodejs
+    pkgs.nodejs_20
     pkgs.nodePackages.pnpm
   ];
 
