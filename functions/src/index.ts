@@ -5,7 +5,7 @@ import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
 admin.initializeApp();
 
-const API_KEY = "AIzaSyDrKDIc6vBsxAJxH-YSMXTdilBeQxSX3rw";
+const API_KEY = "AIzaSyBHIwAYcYXKsoMjiL5gARmfL6cLO7o_040";
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 // Define the Agent Logic

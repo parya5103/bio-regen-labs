@@ -1,6 +1,6 @@
 window["APP_TEMPLATE_BOOTSTRAP"] = {
     firebase: {
-      apiKey: "AIzaSyDrKDIc6vBsxAJxH-YSMXTdilBeQxSX3rw",
+      apiKey: "AIzaSyBHIwAYcYXKsoMjiL5gARmfL6cLO7o_040",
       authDomain: "smart-web-builder-ai.firebaseapp.com",
       databaseURL: "",
       projectId: "smart-web-builder-ai",

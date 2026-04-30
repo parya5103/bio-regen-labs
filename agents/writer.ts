@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as fs from 'fs';
 
-const API_KEY = "AIzaSyDrKDIc6vBsxAJxH-YSMXTdilBeQxSX3rw";
+const API_KEY = "AIzaSyBHIwAYcYXKsoMjiL5gARmfL6cLO7o_040";
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 export async function generateHighQualityArticle(topic: string, brief: string) {

@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
-const API_KEY = "AIzaSyDrKDIc6vBsxAJxH-YSMXTdilBeQxSX3rw"; // Using project's verified key
+const API_KEY = "AIzaSyBHIwAYcYXKsoMjiL5gARmfL6cLO7o_040"; // Using project's verified key
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 const schema = {
