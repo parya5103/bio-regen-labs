@@ -1,172 +1,136 @@
 /**
- * Autonomous Manager - Refined with Fallback and Resilient Agent Logic
+ * Autonomous Orchestrator - Real-time Firestore Sync
  */
 
+import * as admin from 'firebase-admin';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
+// Initialize Firebase Admin
+if (admin.apps.length === 0) {
+    admin.initializeApp({
+        projectId: "smart-web-builder-ai"
+    });
+}
+
+const db = admin.firestore();
 const API_KEY = "AIzaSyBHIwAYcYXKsoMjiL5gARmfL6cLO7o_040";
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 export class AutonomousManager {
   private projectPath = path.join(process.cwd(), 'bio-regen-labs-site');
+  private isRunning = false;
+
+  constructor() {
+    console.log("🛰️ Orchestrator: Listening for Admin Commands...");
+    this.listenForCommands();
+  }
+
+  private listenForCommands() {
+    db.collection('personal_sites').doc('trigger').onSnapshot(async (snap) => {
+      const data = snap.data();
+      if (data && data['action'] === 'FORCE_DEPLOY' && !this.isRunning) {
+        console.log("⚡ Command Received: FORCE_DEPLOY");
+        await this.runFullLoop();
+        await snap.ref.update({ action: 'COMPLETED', completedAt: admin.firestore.FieldValue.serverTimestamp() });
+      }
+    });
+  }
+
+  private async log(step: string, message: string) {
+      console.log(`[${step}] ${message}`);
+      await db.collection('system_logs').add({
+          step,
+          message,
+          timestamp: admin.firestore.FieldValue.serverTimestamp()
+      });
+  }
 
   async runFullLoop() {
-    console.log("🤖 Multi-Agent System: Initialization");
+    if (this.isRunning) return;
+    this.isRunning = true;
+    
+    await this.log("SYSTEM", "Starting full autonomous cycle...");
 
-    // 1. Discovery (Agent 1 & 2)
     let niche = "";
     try {
+      await this.log("DISCOVERY", "Researching trending niches...");
       niche = await this.discoverNiche();
+      await this.log("DISCOVERY", `Target niche identified: ${niche}`);
     } catch (e) {
-      console.warn("⚠️ Agent 1: API Blocked. Falling back to high-potential pre-validated niche.");
-      niche = "AI-Driven Personalized Nootropics"; // Hardcoded fallback for demonstration
+      await this.log("DISCOVERY", "API Blocked. Using fallback niche.");
+      niche = "AI-Driven Personalized Nootropics";
     }
-    
-    console.log(`🎯 Target Niche: ${niche}`);
 
-    // 2. Code Generation (Agent 3)
+    await this.log("ARCHITECTURE", `Building site structure for ${niche}...`);
     await this.generateSiteStructure(niche);
 
-    // 3. Content Injection (Agent 4 & 5)
     try {
+      await this.log("CONTENT", "Generating SEO optimized expert content...");
       await this.injectContent(niche);
     } catch (e) {
-      console.warn("⚠️ Agent 4: Content Generation failed. Injecting placeholder expert content.");
+      await this.log("CONTENT", "Generation failed. Injecting placeholder.");
       this.injectPlaceholderContent(niche);
     }
 
-    // 4. GitHub Sync (Agent 6)
-    await this.githubAgentSync();
+    await db.collection('niche_history').add({
+        niche,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        status: 'LIVE'
+    });
 
-    // 5. Firebase Deployment (Agent 7)
+    await this.log("DEPLOYMENT", "Pushing to Firebase Hosting...");
     await this.firebaseDeployAgent();
 
-    console.log("\n🚀 SYSTEM STATUS: ALL AGENTS REPORT SUCCESS");
-    console.log(`🔗 Live URL: https://smart-web-builder-ai.web.app`);
-    console.log(`📂 Local Repository: ${this.projectPath}`);
+    await this.log("SYSTEM", "Cycle completed successfully. System standby.");
+    this.isRunning = false;
   }
 
   private async discoverNiche() {
-    console.log("🕵️ Agent 1: Researching Trends...");
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Using 1.5 for better compatibility
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const prompt = "Choose one high-potential trending niche for an AI-generated healthcare blog. Return ONLY the niche name.";
     const result = await model.generateContent(prompt);
     return result.response.text().trim();
   }
 
   private async generateSiteStructure(niche: string) {
-    console.log(`🏗️ Agent 3: Building Site Architecture for ${niche}...`);
     if (!fs.existsSync(this.projectPath)) fs.mkdirSync(this.projectPath, { recursive: true });
-    
-    const firebaseConfig = {
-      hosting: {
-        public: "public",
-        ignore: ["firebase.json", "**/.*", "**/node_modules/**"]
-      }
-    };
-    fs.writeFileSync(path.join(this.projectPath, 'firebase.json'), JSON.stringify(firebaseConfig, null, 2));
-    
     const publicDir = path.join(this.projectPath, 'public');
     if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
     
-    const indexHtml = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>${niche} | Future of Health</title>
-          <script src="https://cdn.tailwindcss.com"></script>
-      </head>
-      <body class="bg-slate-50 font-sans">
-          <nav class="p-6 bg-white border-b flex justify-between items-center shadow-sm">
-              <h1 class="text-2xl font-black text-blue-600 tracking-tight">${niche.toUpperCase()} LABS</h1>
-              <div class="space-x-6 text-slate-600 font-medium">
-                <a href="/" class="hover:text-blue-600 transition">Home</a>
-                <a href="/blog" class="hover:text-blue-600 transition">Articles</a>
-                <a href="/about" class="hover:text-blue-600 transition">About</a>
-              </div>
-          </nav>
-          <header class="py-32 px-6 text-center bg-white border-b">
-              <h2 class="text-6xl font-extrabold text-slate-900 mb-6 tracking-tighter">${niche}</h2>
-              <p class="text-2xl text-slate-500 max-w-3xl mx-auto leading-relaxed">
-                Unlock the potential of longevity through data-driven analysis and ${niche} optimization.
-              </p>
-          </header>
-          <section id="articles" class="max-w-5xl mx-auto py-20 px-6">
-            <div id="content-area" class="prose prose-slate lg:prose-xl mx-auto">
-              <!-- Content will be injected here -->
-            </div>
-          </section>
-          <footer class="py-20 text-center text-slate-400 border-t bg-white">
-            <p>© 2025 ${niche} Labs. Autonomous Intelligence in Action.</p>
-          </footer>
-      </body>
-      </html>
-    `;
+    const indexHtml = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>${niche}</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-slate-50"><nav class="p-6 bg-white border-b"><h1>${niche}</h1></nav><main class="p-10"><!-- Content --></main></body></html>`;
     fs.writeFileSync(path.join(publicDir, 'index.html'), indexHtml);
   }
 
   private async injectContent(niche: string) {
-    console.log("✍️ Agent 4: Writing SEO Content...");
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const prompt = `Write a deep-dive 1500-word expert article about ${niche}. Focus on scientific breakthroughs and practical tips. Return only the body HTML.`;
+    const prompt = `Write a 500-word expert article about ${niche}. Return only the HTML body.`;
     const result = await model.generateContent(prompt);
     const content = result.response.text();
     
-    const blogDir = path.join(this.projectPath, 'public', 'blog');
-    if (!fs.existsSync(blogDir)) fs.mkdirSync(blogDir, { recursive: true });
-    fs.writeFileSync(path.join(blogDir, 'latest-research.html'), content);
-    
-    // Inject into home
     const indexFile = path.join(this.projectPath, 'public', 'index.html');
     let indexHtml = fs.readFileSync(indexFile, 'utf8');
-    indexHtml = indexHtml.replace('<!-- Content will be injected here -->', content);
+    indexHtml = indexHtml.replace('<!-- Content -->', content);
     fs.writeFileSync(indexFile, indexHtml);
   }
 
   private injectPlaceholderContent(niche: string) {
-    const placeholder = `<div class='p-10 bg-blue-50 border border-blue-100 rounded-2xl'>
-      <h2 class='text-3xl font-bold mb-4'>The science of ${niche}</h2>
-      <p class='text-lg'>Comprehensive analysis is currently being compiled by our AI agents. 
-      Check back daily for the latest updates on ${niche} and biological regeneration.</p>
-    </div>`;
     const indexFile = path.join(this.projectPath, 'public', 'index.html');
     let indexHtml = fs.readFileSync(indexFile, 'utf8');
-    indexHtml = indexHtml.replace('<!-- Content will be injected here -->', placeholder);
+    indexHtml = indexHtml.replace('<!-- Content -->', `<p>Coming soon: ${niche}</p>`);
     fs.writeFileSync(indexFile, indexHtml);
   }
 
-  private async githubAgentSync() {
-    console.log("🐙 Agent 6: GitHub Code Management...");
-    try {
-      const originalCwd = process.cwd();
-      process.chdir(this.projectPath);
-      execSync('git init');
-      execSync('git config user.name "Autonomous Agent"');
-      execSync('git config user.email "agent@bio-regen-labs.ai"');
-      execSync('git remote add origin https://github.com/parya5103/bio-regen-labs.git || true');
-      execSync('git add .');
-      execSync('git commit -m "Autonomous Loop: Site architecture and content update"');
-      execSync('git push origin main --force');
-      process.chdir(originalCwd);
-    } catch (e) {
-      console.error("GitHub Sync error:", e);
-    }
-  }
-
   private async firebaseDeployAgent() {
-    console.log("🚀 Agent 7: Firebase Hosting Deployment...");
     try {
       const originalCwd = process.cwd();
       process.chdir(this.projectPath);
       execSync('firebase deploy --only hosting --project smart-web-builder-ai');
       process.chdir(originalCwd);
     } catch (e) {
-      console.error("Firebase Deploy error:", e);
+      console.error("Deploy error:", e);
     }
   }
 }

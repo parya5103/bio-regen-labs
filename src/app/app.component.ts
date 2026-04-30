@@ -190,7 +190,7 @@ export class AppComponent {
         createdTime: Timestamp.fromDate(new Date()),
         priority: 'none',
       };
-      const subtasks = generatedSubtasks?.map(
+      const subtasks: Task[] = generatedSubtasks?.map(
         (generatedSubtask, i) => {
           return {
             id: this.taskService.createTaskRef().id,
@@ -200,9 +200,10 @@ export class AppComponent {
             order: i,
             owner: maintask.owner,
             createdTime: maintask.createdTime,
+            priority: 'none'
           };
         }
-      );
+      ) || [];
       this.generatedTask = { maintask, subtasks };
     } catch (error) {
       this.handleError(error, 'Failed to generate main task.');
