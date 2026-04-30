@@ -1,5 +1,22 @@
 {
-    "hosting": {
-      "public": "dist/firebase-ai-angular/browser"
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ]
     }
+  ],
+  "hosting": {
+    "public": "dist/firebase-ai-angular/browser",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
 }

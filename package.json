@@ -20,12 +20,16 @@
     "@angular/material": "^19.2.16",
     "@angular/platform-browser": "^19.2.11",
     "@angular/platform-browser-dynamic": "^19.2.11",
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.15.2",
     "backoff-rxjs": "^7.0.0",
     "firebase": "11.8.0",
+    "firebase-admin": "^13.8.0",
     "rxjs": "~7.8.2",
     "tailwindcss": "^3.4.1",
     "tslib": "^2.8.1",
     "uuid": "^11.1.0",
+    "zod": "^4.3.6",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
@@ -35,6 +39,7 @@
     "@tailwindcss/oxide-linux-x64-gnu": "^4.2.4",
     "@tailwindcss/postcss": "4.0.0",
     "@types/jasmine": "~5.1.8",
+    "@types/node": "^25.6.0",
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.5.0",
     "jasmine-core": "~5.7.1",
@@ -44,6 +49,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "postcss": "^8.5.12",
+    "ts-node": "^10.9.2",
     "typescript": "~5.8.3"
   }
 }
